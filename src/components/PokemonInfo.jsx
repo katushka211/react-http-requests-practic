@@ -2,6 +2,7 @@ import { Component } from 'react';
 import { PokemonErrorView } from './PokemonErrorView';
 import { PokemonDataView } from './PokemonDataView';
 import { PokemonPendingView } from './PokemonPendingView';
+import { fetchPokemon } from './services/pokemon-api';
 
 export class PokemonInfo extends Component {
   state = {
@@ -17,19 +18,11 @@ export class PokemonInfo extends Component {
         status: 'pending',
       });
 
-      setTimeout(() => {
-        fetch(`https://pokeapi.co/api/v2/pokemon/${nextName}`)
-          .then(response => {
-            if (response.ok) {
-              return response.json();
-            }
-            return Promise.reject(
-              new Error(`Покемона з ім'ям ${nextName} не існує`)
-            );
-          })
-          .then(pokemon => this.setState({ pokemon, status: 'resolved' }))
-          .catch(error => this.setState({ error, status: 'rejected' }));
-      }, 1000);
+      // setTimeout(() => {
+      fetchPokemon(nextName)
+        .then(pokemon => this.setState({ pokemon, status: 'resolved' }))
+        .catch(error => this.setState({ error, status: 'rejected' }));
+      // }, 2000);
     }
   }
   render() {

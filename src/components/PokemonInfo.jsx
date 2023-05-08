@@ -1,4 +1,7 @@
 import { Component } from 'react';
+import { PokemonErrorView } from './PokemonErrorView';
+import { PokemonDataView } from './PokemonDataView';
+import { PokemonPendingView } from './PokemonPendingView';
 
 export class PokemonInfo extends Component {
   state = {
@@ -14,45 +17,39 @@ export class PokemonInfo extends Component {
         status: 'pending',
       });
 
-      fetch(`https://pokeapi.co/api/v2/pokemon/${nextName}`)
-        .then(response => {
-          if (response.ok) {
-            return response.json();
-          }
-          return Promise.reject(
-            new Error(`Покемона з ім'ям ${nextName} не існує`)
-          );
-        })
-        .then(pokemon => this.setState({ pokemon, status: 'resolved' }))
-        .catch(error => this.setState({ error, status: 'rejected' }));
+      setTimeout(() => {
+        fetch(`https://pokeapi.co/api/v2/pokemon/${nextName}`)
+          .then(response => {
+            if (response.ok) {
+              return response.json();
+            }
+            return Promise.reject(
+              new Error(`Покемона з ім'ям ${nextName} не існує`)
+            );
+          })
+          .then(pokemon => this.setState({ pokemon, status: 'resolved' }))
+          .catch(error => this.setState({ error, status: 'rejected' }));
+      }, 1000);
     }
   }
   render() {
     const { pokemon, error, status } = this.state;
+    const { pokemonName } = this.props;
 
     if (status === 'idle') {
       return <div>Введіть ім'я покемона</div>;
     }
 
     if (status === 'pending') {
-      return <div>Завантажуємо...</div>;
+      return <PokemonPendingView pokemonName={pokemonName} />;
     }
 
     if (status === 'rejected') {
-      return <h1>{error.message}</h1>;
+      return <PokemonErrorView message={error.message} />;
     }
 
     if (status === 'resolved') {
-      return (
-        <div>
-          <p>{pokemon.name}</p>
-          <img
-            src={pokemon.sprites.other['official-artwork'].front_default}
-            alt={pokemon.name}
-            width="240"
-          />
-        </div>
-      );
+      return <PokemonDataView pokemon={pokemon} />;
     }
   }
 }

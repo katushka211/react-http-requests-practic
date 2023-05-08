@@ -4,24 +4,31 @@ import { PokemonDataView } from './PokemonDataView';
 import { PokemonPendingView } from './PokemonPendingView';
 import { fetchPokemon } from './services/pokemon-api';
 
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
+
 export class PokemonInfo extends Component {
   state = {
     pokemon: null,
     error: null,
-    status: 'idle',
+    status: 'Status.IDLE',
   };
   componentDidUpdate(prevProps, prevState) {
     const prevName = prevProps.pokemonName;
     const nextName = this.props.pokemonName;
     if (prevName !== nextName) {
       this.setState({
-        status: 'pending',
+        status: Status.PENDING,
       });
 
       // setTimeout(() => {
       fetchPokemon(nextName)
-        .then(pokemon => this.setState({ pokemon, status: 'resolved' }))
-        .catch(error => this.setState({ error, status: 'rejected' }));
+        .then(pokemon => this.setState({ pokemon, status: Status.RESOLVED }))
+        .catch(error => this.setState({ error, status: Status.REJECTED }));
       // }, 2000);
     }
   }
@@ -29,19 +36,19 @@ export class PokemonInfo extends Component {
     const { pokemon, error, status } = this.state;
     const { pokemonName } = this.props;
 
-    if (status === 'idle') {
+    if (status === Status.IDLE) {
       return <div>Введіть ім'я покемона</div>;
     }
 
-    if (status === 'pending') {
+    if (status === Status.PENDING) {
       return <PokemonPendingView pokemonName={pokemonName} />;
     }
 
-    if (status === 'rejected') {
+    if (status === Status.REJECTED) {
       return <PokemonErrorView message={error.message} />;
     }
 
-    if (status === 'resolved') {
+    if (status === Status.RESOLVED) {
       return <PokemonDataView pokemon={pokemon} />;
     }
   }
